@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import Ship from './Ship';
+import { useAppDispatch, useAppSelector } from '../state/hooks';
+
 
 const Inventory: React.FC = () => {
-    const [ships, setShips] = useState([
-        { id: 1, length: 3, width: 1, show: true },
-        { id: 2, length: 2, width: 1, show: true },
-        { id: 3, length: 1, width: 1, show: true }
-    ]);
+    const ships = useAppSelector((state) => state.ships.ships);
+    const dispatch = useAppDispatch();
+
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: number, length: number, width: number) => {
         console.log(`Drag started for ship with id: ${id} length:${length} width:${width}`);
