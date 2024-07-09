@@ -1,7 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
-import boardReducer,{BoardState} from './board/boardSlice'
-import shipsReducer,{ShipState} from './ship/shipSlice'
-import strikeReducer,{StrikeState} from './strike/strikeSlice'
+import boardReducer from './board/boardSlice'
+import shipsReducer from './ship/shipSlice'
+import strikeReducer from './strike/strikeSlice'
+
 
 
 
@@ -11,7 +12,8 @@ export const store = configureStore({
     reducer: {
         board : boardReducer,
         ships: shipsReducer,
-        strike:strikeReducer
+        strike:strikeReducer,
+
     },
 });
 

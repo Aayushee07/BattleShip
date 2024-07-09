@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Ship from './Ship';
-import { useAppDispatch, useAppSelector } from '../state/hooks';
+import {  useAppSelector } from '../state/hooks';
 
 
 const Inventory: React.FC = () => {
     const ships = useAppSelector((state) => state.ships.ships);
-    const dispatch = useAppDispatch();
+  
 
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: number, length: number, width: number) => {

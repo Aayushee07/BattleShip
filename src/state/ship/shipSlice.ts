@@ -5,7 +5,7 @@ interface Ship {
     length: number;
     width: number;
     show: boolean;
-    position: { row: number; col: number }[]; // optional position property
+    position: { row: number; col: number }[]; 
 }
 
 interface ShipState {
