@@ -1,4 +1,5 @@
 import { createSlice,PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 
 interface Ship {
     id: number;
@@ -45,4 +46,5 @@ const shipSlice = createSlice({
 
 export const {setShow,setPosition} = shipSlice.actions
 export default shipSlice.reducer
-export type{ShipState}
+export type{ShipState,Ship}
+export const selectShips = (state: RootState) => state.ships;

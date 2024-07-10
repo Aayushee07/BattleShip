@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from '../state/hooks';
 import { setPlayerGrid, setOpponentGrid } from '../state/board/boardSlice';
 import { setPosition, setShow } from '../state/ship/shipSlice';
 import { setStrike } from '../state/strike/strikeSlice';
+import { sendStrike } from '../websocket';
 
 interface BoardProps {
   size: number;
@@ -15,8 +16,10 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
   const opponentGrid = useAppSelector((state) => state.board.opponentGrid);
   const grid = currentPlayerBoard ? playerGrid : opponentGrid;
   const ships = useAppSelector((state)=>state.ships.ships)
-  const strikes = useAppSelector((state)=>state.strike.strikePositions)
+  const strikes = useAppSelector((state)=>state.strike.strikes)
   const dispatch = useAppDispatch();
+  const sessionID = useAppSelector((state)=>state.session.sessionId)
+  const strikeResults = useAppSelector((state)=>state.strike.strikeResults)
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -64,8 +67,10 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
     if (currentPlayerBoard) return;
    dispatch(setStrike({row:rowIndex,col:colIndex}))
     console.log(`Cell clicked at (${rowIndex}, ${colIndex})`);
+    sendStrike(rowIndex, colIndex,sessionID);
     console.log(strikes)
   };
+
 
   return (
     <div className={`grid grid-cols-${size} gap-1 mx-10`}>
