@@ -9,13 +9,15 @@ interface CellProps {
   isShip: boolean;
   isHit: boolean;
   isMiss: boolean;
+  isDamage:boolean;
 }
 
-const Cell: React.FC<CellProps> = ({ rowIndex, colIndex, onDragOver, onDrop, onClick, isShip, isHit, isMiss }) => {
+const Cell: React.FC<CellProps> = ({ rowIndex, colIndex, onDragOver, onDrop, onClick, isShip, isHit, isMiss ,isDamage}) => {
   let cellClass = 'bg-sky-300';
   if (isShip) cellClass = 'bg-cyan-700 rounded-full';
-  if (isHit) cellClass = 'bg-green-400 rounded-full';
+  if (isHit) cellClass = 'bg-green-400 rounded-full'; 
   if (isMiss) cellClass = 'bg-red-400 rounded-full';
+  if(isDamage)cellClass='bg-yellow-300 rounded-full'
 
   return (
     <div

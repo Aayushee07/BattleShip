@@ -1,5 +1,5 @@
 import { store } from './state/store';
-import { setStrike, setStrikeResult } from './state/strike/strikeSlice';
+import { setDamageResult, setStrike, setStrikeResult } from './state/strike/strikeSlice';
 import { selectShips } from './state/ship/shipSlice'; 
 import { Ship } from './state/ship/shipSlice'; 
 import { setSessionId } from './state/session/sessionSlice';
@@ -52,6 +52,11 @@ const handleWebSocketMessage = (message: any) => {
       const isHit = checkStrike(ships.ships, message.data.row, message.data.col);
 
       sendStrikeResult(isHit, message.data.row, message.data.col);
+
+      if (isHit) {
+        store.dispatch(setDamageResult(message.data)); 
+        
+      }
       break;
     case 'strikeResult':
       store.dispatch(setStrikeResult(message.data));

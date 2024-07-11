@@ -20,22 +20,40 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
   const dispatch = useAppDispatch();
   const sessionID = useAppSelector((state) => state.session.sessionId);
   const strikeResults = useAppSelector((state) => state.strike.strikeResults);
+  const damageResults = useAppSelector((state) => state.strike.damageResults);
+
+  const previousDamageResultsLength = useRef(damageResults.length);
+
+  console.log('in damage',damageResults)
+
+  useEffect(() => {
+    if (damageResults.length === previousDamageResultsLength.current) return;
+
+    const latestResult = damageResults[damageResults.length - 1];
+
+    const updatedPlayerGrid = playerGrid.map(row => row.slice());
+    updatedPlayerGrid[latestResult.row][latestResult.col] = 'damage';
+    dispatch(setPlayerGrid(updatedPlayerGrid));
+    console.log('damage')
+    console.log(damageResults);
+
+    previousDamageResultsLength.current = damageResults.length;
+  }, [damageResults, dispatch, playerGrid]);
 
   const previousStrikeResultsLength = useRef(strikeResults.length);
 
   useEffect(() => {
     if (strikeResults.length === previousStrikeResultsLength.current) return;
 
-    // Access the latest strike result
     const latestResult = strikeResults[strikeResults.length - 1];
 
-    // slice creates a shallow copy of the grid to avoid direct mutations
+    
     const updatedOpponentGrid = opponentGrid.map(row => row.slice());
 
     updatedOpponentGrid[latestResult.row][latestResult.col] = latestResult.result === 'hit' ? 'hit' : 'miss';
     dispatch(setOpponentGrid(updatedOpponentGrid));
 
-    // Update the previous length
+
     previousStrikeResultsLength.current = strikeResults.length;
 
   }, [strikeResults, dispatch, opponentGrid]);
@@ -86,14 +104,12 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
     console.log(`Cell clicked at (${rowIndex}, ${colIndex})`);
     sendStrike(rowIndex, colIndex, sessionID);
 
-    // Find if there's a strike result at the clicked position
     const result = strikeResults.find(result => result.row === rowIndex && result.col === colIndex);
     console.log(strikeResults)
     console.log("result")
     console.log(result)
 
     if (result) {
-      // Update opponent grid based on strike results
       const updatedOpponentGrid = opponentGrid.map(row => row.slice());
       updatedOpponentGrid[rowIndex][colIndex] = result? 'hit' : 'miss';
       dispatch(setOpponentGrid(updatedOpponentGrid));
@@ -117,6 +133,7 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
             isShip={cell === 'ship'}
             isHit={cell === 'hit'}
             isMiss={cell === 'miss'}
+            isDamage = {cell==='damage'}
           />
         ))
       )}
