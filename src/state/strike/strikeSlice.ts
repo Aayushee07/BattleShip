@@ -4,7 +4,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface StrikeState {
   strikes: { row: number; col: number }[];
-  strikeResults: { row: number; col: number; isHit: boolean }[];
+  strikeResults: { row: number; col: number; result: string }[];
 }
 
 const initialState: StrikeState = {
@@ -19,7 +19,7 @@ const strikeSlice = createSlice({
     setStrike(state, action: PayloadAction<{ row: number; col: number }>) {
       state.strikes.push(action.payload);
     },
-    setStrikeResult(state, action: PayloadAction<{ row: number; col: number; isHit: boolean }>) {
+    setStrikeResult(state, action: PayloadAction<{ row: number; col: number; result: string }>) {
       state.strikeResults.push(action.payload);
     },
   },

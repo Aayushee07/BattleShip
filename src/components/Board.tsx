@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Cell from './Cell';
 import { useAppSelector, useAppDispatch } from '../state/hooks';
 import { setPlayerGrid, setOpponentGrid } from '../state/board/boardSlice';
 import { setPosition, setShow } from '../state/ship/shipSlice';
 import { setStrike } from '../state/strike/strikeSlice';
 import { sendStrike } from '../websocket';
+
+
 
 interface BoardProps {
   size: number;
@@ -15,11 +17,28 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
   const playerGrid = useAppSelector((state) => state.board.playerGrid);
   const opponentGrid = useAppSelector((state) => state.board.opponentGrid);
   const grid = currentPlayerBoard ? playerGrid : opponentGrid;
-  const ships = useAppSelector((state)=>state.ships.ships)
-  const strikes = useAppSelector((state)=>state.strike.strikes)
   const dispatch = useAppDispatch();
-  const sessionID = useAppSelector((state)=>state.session.sessionId)
-  const strikeResults = useAppSelector((state)=>state.strike.strikeResults)
+  const sessionID = useAppSelector((state) => state.session.sessionId);
+  const strikeResults = useAppSelector((state) => state.strike.strikeResults);
+
+  const previousStrikeResultsLength = useRef(strikeResults.length);
+
+  useEffect(() => {
+    if (strikeResults.length === previousStrikeResultsLength.current) return;
+
+    // Access the latest strike result
+    const latestResult = strikeResults[strikeResults.length - 1];
+
+    // slice creates a shallow copy of the grid to avoid direct mutations
+    const updatedOpponentGrid = opponentGrid.map(row => row.slice());
+
+    updatedOpponentGrid[latestResult.row][latestResult.col] = latestResult.result === 'hit' ? 'hit' : 'miss';
+    dispatch(setOpponentGrid(updatedOpponentGrid));
+
+    // Update the previous length
+    previousStrikeResultsLength.current = strikeResults.length;
+
+  }, [strikeResults, dispatch, opponentGrid]);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -36,7 +55,6 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
     if (!shipData) return;
 
     const { id, length, width } = JSON.parse(shipData);
-    
 
     if (rowIndex + length > size || colIndex + width > size) {
       console.log('Ship does not fit within the grid boundaries.');
@@ -49,15 +67,13 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
       for (let j = colIndex; j < colIndex + width; j++) {
         newGrid[i][j] = 'ship';
         dispatch(setPosition({ id, position: { row: i, col: j } }));
-     
       }
     }
 
     console.log(`Ship dropped at (${rowIndex},${colIndex})`);
     if (currentPlayerBoard) {
-      dispatch(setShow(id))
+      dispatch(setShow(id));
       dispatch(setPlayerGrid(newGrid));
-      console.log(ships)
     } else {
       dispatch(setOpponentGrid(newGrid));
     }
@@ -65,17 +81,29 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
 
   const handleClick = (rowIndex: number, colIndex: number) => {
     if (currentPlayerBoard) return;
-   dispatch(setStrike({row:rowIndex,col:colIndex}))
-    console.log(`Cell clicked at (${rowIndex}, ${colIndex})`);
-    sendStrike(rowIndex, colIndex,sessionID);
-    console.log(strikes)
-  };
 
+    dispatch(setStrike({ row: rowIndex, col: colIndex }));
+    console.log(`Cell clicked at (${rowIndex}, ${colIndex})`);
+    sendStrike(rowIndex, colIndex, sessionID);
+
+    // Find if there's a strike result at the clicked position
+    const result = strikeResults.find(result => result.row === rowIndex && result.col === colIndex);
+    console.log(strikeResults)
+    console.log("result")
+    console.log(result)
+
+    if (result) {
+      // Update opponent grid based on strike results
+      const updatedOpponentGrid = opponentGrid.map(row => row.slice());
+      updatedOpponentGrid[rowIndex][colIndex] = result? 'hit' : 'miss';
+      dispatch(setOpponentGrid(updatedOpponentGrid));
+    }
+  };
 
   return (
     <div className={`grid grid-cols-${size} gap-1 mx-10`}>
       {grid.map((row, rowIndex) =>
-        row.map((_, colIndex) => (
+        row.map((cell, colIndex) => (
           <Cell
             key={`${rowIndex}-${colIndex}`}
             rowIndex={rowIndex}
@@ -83,11 +111,12 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard }) => {
             onDragOver={handleDragOver}
             onDrop={(e) => {
               if (!currentPlayerBoard) return;
-           
               handleDrop(e, rowIndex, colIndex);
             }}
             onClick={() => handleClick(rowIndex, colIndex)}
-            isShip={_ === 'ship'}
+            isShip={cell === 'ship'}
+            isHit={cell === 'hit'}
+            isMiss={cell === 'miss'}
           />
         ))
       )}

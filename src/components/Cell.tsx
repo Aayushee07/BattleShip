@@ -5,11 +5,18 @@ interface CellProps {
   colIndex: number;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
-  isShip: boolean;
   onClick: (rowIndex: number, colIndex: number) => void;
+  isShip: boolean;
+  isHit: boolean;
+  isMiss: boolean;
 }
 
-const Cell: React.FC<CellProps> = ({ rowIndex, colIndex, onDragOver, onDrop, isShip, onClick }) => {
+const Cell: React.FC<CellProps> = ({ rowIndex, colIndex, onDragOver, onDrop, onClick, isShip, isHit, isMiss }) => {
+  let cellClass = 'bg-sky-300';
+  if (isShip) cellClass = 'bg-cyan-700 rounded-full';
+  if (isHit) cellClass = 'bg-green-400 rounded-full';
+  if (isMiss) cellClass = 'bg-red-400 rounded-full';
+
   return (
     <div
       data-row={rowIndex}
@@ -17,10 +24,8 @@ const Cell: React.FC<CellProps> = ({ rowIndex, colIndex, onDragOver, onDrop, isS
       onDragOver={onDragOver}
       onDrop={onDrop}
       onClick={() => onClick(rowIndex, colIndex)}
-      className={`w-full h-19 ${isShip ? 'bg-cyan-700 rounded-full' : 'bg-sky-300'}`}
-    >
-      
-    </div>
+      className={`w-full h-19 ${cellClass}`}
+    />
   );
 };
 
