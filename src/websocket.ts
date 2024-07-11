@@ -2,6 +2,7 @@ import { store } from './state/store';
 import { setStrike, setStrikeResult } from './state/strike/strikeSlice';
 import { selectShips } from './state/ship/shipSlice'; 
 import { Ship } from './state/ship/shipSlice'; 
+import { setSessionId } from './state/session/sessionSlice';
 
 let socket: WebSocket;
 let sessionId: string | null = null;
@@ -31,6 +32,7 @@ const handleWebSocketMessage = (message: any) => {
   switch (message.type) {
     case 'sessionCreated':
       sessionId = message.data.sessionId;
+      store.dispatch(setSessionId(message.data.sessionId))
       playerId = message.data.playerId; 
       console.log(`Session created with ID: ${sessionId}, Player ID: ${playerId}`);
       break;

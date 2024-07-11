@@ -8,6 +8,7 @@ const Home: React.FC = () => {
   const sessionId = useAppSelector((state) => state.session.sessionId); 
   const playerId = useAppSelector((state) => state.session.playerId); 
   const dispatch = useAppDispatch(); 
+  const [copy,setCopy] = useState(false)
 
   const handleCreateSession = () => {
     createSession(); 
@@ -20,6 +21,18 @@ const Home: React.FC = () => {
   const handleSessionIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSessionId(e.target.value)); 
   };
+
+  const copyClipboard = async()=>{
+    try{
+      await navigator.clipboard.writeText(sessionId)
+      setCopy(true)
+      
+
+    }catch(e){
+      console.error(e)
+
+    }
+  }
 
  
   return (
@@ -54,6 +67,12 @@ const Home: React.FC = () => {
           </button>
           </Link>
         </div>
+        <button
+            className="bg-sky-200 hover:bg-sky-700 hover:text-white text-gray-700 text-lg px-6 w-30 h-15 mx-4 rounded-full"
+            onClick={copyClipboard}
+          >
+            {copy? 'Copied':'Copy ID'}
+          </button>
       </div>
       <div className="flex justify-center mt-6">
       </div>
