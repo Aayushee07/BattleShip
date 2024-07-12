@@ -3,6 +3,7 @@ import { setDamageResult, setStrike, setStrikeResult } from './state/strike/stri
 import { selectShips } from './state/ship/shipSlice'; 
 import { Ship } from './state/ship/shipSlice'; 
 import { setSessionId } from './state/session/sessionSlice';
+import { setTurn } from './state/turn/turnSlice';
 
 let socket: WebSocket;
 let sessionId: string | null = null;
@@ -21,6 +22,11 @@ export const connectWebSocket = () => {
     const message = JSON.parse(event.data);
     handleWebSocketMessage(message);
     console.log(message)
+
+    if (message.type === 'chance') {
+      const { playerId, chance } = message.data;
+      store.dispatch(setTurn({ playerId, isTurn: chance }));
+    }
   };
 
   socket.onclose = () => {

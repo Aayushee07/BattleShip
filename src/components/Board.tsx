@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+// Board.tsx
+import React, { useEffect, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import Cell from './Cell';
-import { useAppSelector, useAppDispatch } from '../state/hooks';
+import { RootState } from '../state/store';
 import { setPlayerGrid, setOpponentGrid } from '../state/board/boardSlice';
 import { setPosition, setShow } from '../state/ship/shipSlice';
 import { setStrike } from '../state/strike/strikeSlice';
@@ -9,17 +11,18 @@ import { sendStrike } from '../websocket';
 interface BoardProps {
   size: number;
   currentPlayerBoard: boolean;
-  onGameOver: (winner: string,confetti:boolean) => void;
+  onGameOver: (winner: string, confetti: boolean) => void;
 }
 
 const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard, onGameOver }) => {
-  const playerGrid = useAppSelector((state) => state.board.playerGrid);
-  const opponentGrid = useAppSelector((state) => state.board.opponentGrid);
+  const playerGrid = useSelector((state: RootState) => state.board.playerGrid);
+  const opponentGrid = useSelector((state: RootState) => state.board.opponentGrid);
   const grid = currentPlayerBoard ? playerGrid : opponentGrid;
-  const dispatch = useAppDispatch();
-  const sessionID = useAppSelector((state) => state.session.sessionId);
-  const strikeResults = useAppSelector((state) => state.strike.strikeResults);
-  const damageResults = useAppSelector((state) => state.strike.damageResults);
+  const dispatch = useDispatch();
+  const sessionID = useSelector((state: RootState) => state.session.sessionId);
+  const strikeResults = useSelector((state: RootState) => state.strike.strikeResults);
+  const damageResults = useSelector((state: RootState) => state.strike.damageResults);
+  const isTurn = useSelector((state: RootState) => state.turn.isTurn); 
 
   const previousDamageResultsLength = useRef(damageResults.length);
 
@@ -33,7 +36,7 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard, onGameOver }) =
     dispatch(setPlayerGrid(updatedPlayerGrid));
 
     if (damageResults.length === 6) {
-      onGameOver('You lost!',false);
+      onGameOver(currentPlayerBoard ? 'You lost!' : 'You won!', false);
     }
 
     previousDamageResultsLength.current = damageResults.length;
@@ -52,11 +55,11 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard, onGameOver }) =
     // Check for 6 hits
     const hitsCount = strikeResults.filter(result => result.result === 'hit').length;
     if (hitsCount === 6) {
-      onGameOver('You won!',true);
+      onGameOver(currentPlayerBoard ? 'You lost!' : 'You won!', true);
     }
 
     previousStrikeResultsLength.current = strikeResults.length;
-  }, [strikeResults, dispatch, opponentGrid]);
+  }, [strikeResults, dispatch, opponentGrid, currentPlayerBoard, onGameOver]);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -95,21 +98,14 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard, onGameOver }) =
   };
 
   const handleClick = (rowIndex: number, colIndex: number) => {
-    if (currentPlayerBoard) return;
+    if (!isTurn || currentPlayerBoard) return;
 
     dispatch(setStrike({ row: rowIndex, col: colIndex }));
     sendStrike(rowIndex, colIndex, sessionID);
-
-    const result = strikeResults.find(result => result.row === rowIndex && result.col === colIndex);
-    if (result) {
-      const updatedOpponentGrid = opponentGrid.map(row => row.slice());
-      updatedOpponentGrid[rowIndex][colIndex] = result.result === 'hit' ? 'hit' : 'miss';
-      dispatch(setOpponentGrid(updatedOpponentGrid));
-    }
   };
 
   return (
-    <div className={`grid grid-cols-${size} gap-1 mx-10`}>
+    <div className={`grid grid-cols-${size} gap-1 mx-10 ${!isTurn && !currentPlayerBoard ? 'pointer-events-none opacity-50' : ''}`}>
       {grid.map((row, rowIndex) =>
         row.map((cell, colIndex) => (
           <Cell
