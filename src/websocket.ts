@@ -113,7 +113,6 @@ export const joinSession = (sessionId: string, playerId: string) => {
 
 export const sendStrike = (row: number, col: number,sessionId : string) => {
   if (socket && socket.readyState === WebSocket.OPEN && sessionId) {
-    console.log(sessionId)
     const message = JSON.stringify({ type: 'strike', data: { sessionId, row, col, playerId } });
     socket.send(message);
   }
