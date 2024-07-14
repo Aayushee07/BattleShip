@@ -36,7 +36,7 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard, onGameOver }) =
     dispatch(setPlayerGrid(updatedPlayerGrid));
 
     if (damageResults.length === 6) {
-      onGameOver(currentPlayerBoard ? 'You lost!' : 'You won!', false);
+      onGameOver('You lost!', false);
     }
 
     previousDamageResultsLength.current = damageResults.length;
@@ -55,7 +55,7 @@ const Board: React.FC<BoardProps> = ({ size, currentPlayerBoard, onGameOver }) =
     // Check for 6 hits
     const hitsCount = strikeResults.filter(result => result.result === 'hit').length;
     if (hitsCount === 6) {
-      onGameOver(currentPlayerBoard ? 'You lost!' : 'You won!', true);
+      onGameOver('You won!', true);
     }
 
     previousStrikeResultsLength.current = strikeResults.length;
